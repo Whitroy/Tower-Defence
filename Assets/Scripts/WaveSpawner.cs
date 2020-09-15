@@ -34,7 +34,8 @@ public class WaveSpawner : MonoBehaviour
         }
 
         Timer -= Time.deltaTime;
-        SpawnTimeLeft.text = Mathf.Round(Timer).ToString();
+        Timer = Mathf.Clamp(Timer, 0f, Mathf.Infinity);
+        SpawnTimeLeft.text = string.Format("{0:00.00}",Timer);
     }
 
     IEnumerator SpawnWave()

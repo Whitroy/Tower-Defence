@@ -1,12 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager _instance;
-
-    public GameObject StandardTurret;
-
-    private GameObject _TurretToBuild;
+    private TurretBluePrint _TurretToBuild;
+    public GameObject buildEffect;
     private void Awake()
     {
         if(_instance!=null)
@@ -18,13 +17,39 @@ public class BuildManager : MonoBehaviour
         _instance = this;
     }
 
-    private void Start()
+    public bool CanBuild
     {
-        _TurretToBuild = StandardTurret;
+        get
+        {
+            return _TurretToBuild != null;
+        }
+    }
+    public bool HasMoney
+    {
+        get
+        {
+            return playerStats.Money>=_TurretToBuild.cost;
+        }
     }
 
-    public GameObject GetTurret()
+    public void SelectTurretToBuild(TurretBluePrint Turret)
     {
-        return _TurretToBuild;
+        _TurretToBuild = Turret;
+    }
+
+    public void BuildTurretOn(Node node)
+    {
+        if(playerStats.Money<_TurretToBuild.cost)
+        {
+            Debug.Log("Not Enough Money to build");
+            return;
+        }
+        playerStats.Money -= _TurretToBuild.cost;
+        GameObject turret = (GameObject)Instantiate(_TurretToBuild.prefab, node.GetBuildPosition(),Quaternion.identity);
+        node._turret = turret;
+
+        Instantiate(buildEffect, node.GetBuildPosition(), Quaternion.identity);
+
+        Debug.Log("Money Left:- " + playerStats.Money);
     }
 }

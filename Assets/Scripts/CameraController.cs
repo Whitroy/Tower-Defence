@@ -9,7 +9,7 @@ public class CameraController : MonoBehaviour
     public float ScrollSpeed = 10f;
 
     float Min_Y = 10f;
-    float Max_Y = 60f;
+    float Max_Y = 120f;
 
     float Min_X = -60f;
     float Max_X = 40f;
@@ -17,7 +17,7 @@ public class CameraController : MonoBehaviour
     float Min_Z = -80f;
     float Max_Z = 30f;
 
-    private bool _doMovement = true;
+    private bool _doMovement;
 
     // Start is called before the first frame update
     void Start()

@@ -1,16 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Node : MonoBehaviour
 {
     private Renderer _renderer;
     private Color _startColor;
-    private GameObject _turret;
+    [Header("Optional")]
+    public GameObject _turret;
     private Color _hoverColor;
 
     public Color hoverColor;
+    public Color nothavingMoreMoneyColor;
     public Vector3 SpawnOffset;
+    public BuildManager buildManager;
 
     // Start is called before the first frame update
     void Start()
@@ -18,6 +22,7 @@ public class Node : MonoBehaviour
         _renderer = GetComponent<Renderer>();
         _startColor = _renderer.material.color;
         _hoverColor = hoverColor;
+        buildManager = BuildManager._instance;
     }
 
     // Update is called once per frame
@@ -29,19 +34,35 @@ public class Node : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        _renderer.material.color = _hoverColor;
+        if (!buildManager.CanBuild)
+            return;
+
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
+        if (buildManager.HasMoney)
+            _renderer.material.color = _hoverColor;
+        else
+            _renderer.material.color = nothavingMoreMoneyColor;
+    }
+
+    public Vector3 GetBuildPosition()
+    {
+        return transform.position + SpawnOffset;
     }
 
     private void OnMouseDown()
     {
+        if (!buildManager.CanBuild)
+            return;
+
         if (_turret != null)
         {
             Debug.Log("Can't build");
             return;
         }
 
-        GameObject BuildObject = BuildManager._instance.GetTurret();
-       _turret= Instantiate(BuildObject, transform.position+SpawnOffset, transform.rotation);
+        buildManager.BuildTurretOn(this);
     }
 
     private void OnMouseExit()

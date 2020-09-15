@@ -12,6 +12,10 @@ public class Weapon_Turret : MonoBehaviour
     public Bullet BulletPrefab;
     private float fireCountDown = 0f;
 
+    public bool useLaser = false;
+    public LineRenderer lineRenderer;
+
+
     [Header("Unity Setup Field")]
     public string EnemyTag = "Enemy";
     public Transform Rotator;
@@ -23,6 +27,7 @@ public class Weapon_Turret : MonoBehaviour
     void Start()
     {
         InvokeRepeating("FindTarget", 1f, .5f);
+        lineRenderer.enabled = false;
     }
 
     void FindTarget()
@@ -54,8 +59,35 @@ public class Weapon_Turret : MonoBehaviour
     void Update()
     {
         if (_Target == null)
-            return;
+        {
+            if (useLaser)
+            {
+                if (lineRenderer.enabled)
+                    lineRenderer.enabled = false;
+            }
 
+            return;
+        }
+        LockOnTarget();
+
+        if(useLaser)
+        {
+            Laser();
+        }
+        else
+        {
+            if (fireCountDown <= 0)
+            {
+                Shoot();
+                fireCountDown = 1 / FireRate;
+            }
+
+            fireCountDown -= Time.deltaTime;
+        }
+    }
+
+    void LockOnTarget()
+    {
         Vector3 direction = _Target.position - transform.position;
 
         Quaternion lookrotation = Quaternion.LookRotation(direction);
@@ -63,14 +95,15 @@ public class Weapon_Turret : MonoBehaviour
         Vector3 rotation = Quaternion.Lerp(Rotator.rotation, lookrotation, turnSpeed * Time.deltaTime).eulerAngles;
 
         Rotator.rotation = Quaternion.Euler(0, rotation.y, 0);
+    }
 
-        if(fireCountDown<=0)
-        {
-            Shoot();
-            fireCountDown = 1 / FireRate;
-        }
+    void Laser()
+    {
+        if (!lineRenderer.enabled)
+            lineRenderer.enabled = true;
 
-        fireCountDown -= Time.deltaTime;
+        lineRenderer.SetPosition(0, FirePoint.position);
+        lineRenderer.SetPosition(1, _Target.position);
     }
 
     private void Shoot()

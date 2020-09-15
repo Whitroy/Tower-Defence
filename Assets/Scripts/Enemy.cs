@@ -11,6 +11,11 @@ public class Enemy : MonoBehaviour
     float Speed = 5f;
     Vector3 direction;
 
+    public int health=100;
+    public int value = 50;
+
+    public GameObject deathEffect;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,11 +39,32 @@ public class Enemy : MonoBehaviour
     {
         if(waypointIndex>=Waypoints.Waypoint.Length-1)
         {
-            Destroy(gameObject);
+            EndPath();
             return;
         }
 
         waypointIndex++;
         target = Waypoints.Waypoint[waypointIndex];
+    }
+
+    public void TakeDamage(int amount)
+    {
+        health -= amount;
+
+        if (health <= 0)
+            Die();
+    }
+
+    void Die()
+    {
+        Instantiate(deathEffect, transform.position, Quaternion.identity);
+        playerStats.Money += value;
+        Destroy(gameObject);
+    }
+
+    void EndPath()
+    {
+        playerStats.Lives--;
+        Destroy(gameObject);
     }
 }
