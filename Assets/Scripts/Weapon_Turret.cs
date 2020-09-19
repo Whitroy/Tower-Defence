@@ -14,20 +14,29 @@ public class Weapon_Turret : MonoBehaviour
 
     public bool useLaser = false;
     public LineRenderer lineRenderer;
-
+    public ParticleSystem LaserImpact;
+    public Light glowLight;
 
     [Header("Unity Setup Field")]
     public string EnemyTag = "Enemy";
     public Transform Rotator;
     public float turnSpeed = 10f;
+    public float slowAmount = .5f;
 
     private Transform _Target;
+    public float damageOverTime = 100;
+    private Enemy targetEnemy;
 
     // Start is called before the first frame update
     void Start()
     {
         InvokeRepeating("FindTarget", 1f, .5f);
-        lineRenderer.enabled = false;
+        if (useLaser)
+        {
+            lineRenderer.enabled = false;
+            LaserImpact.Stop();
+            glowLight.enabled = false;
+        }
     }
 
     void FindTarget()
@@ -50,6 +59,7 @@ public class Weapon_Turret : MonoBehaviour
         if (nearesrEnemy != null && shortestDistance <= Range)
         {
             _Target = nearesrEnemy.transform;
+            targetEnemy = nearesrEnemy.GetComponent<Enemy>();
         }
         else
             _Target = null;
@@ -63,7 +73,11 @@ public class Weapon_Turret : MonoBehaviour
             if (useLaser)
             {
                 if (lineRenderer.enabled)
+                {
                     lineRenderer.enabled = false;
+                    LaserImpact.Stop();
+                    glowLight.enabled = false;
+                }
             }
 
             return;
@@ -99,11 +113,25 @@ public class Weapon_Turret : MonoBehaviour
 
     void Laser()
     {
+        targetEnemy.TakeDamage(damageOverTime * Time.deltaTime);
+
+        targetEnemy.Slow(slowAmount);
+
         if (!lineRenderer.enabled)
+        {
             lineRenderer.enabled = true;
+            LaserImpact.Play();
+            LaserImpact.loop = true;
+            glowLight.enabled = true;
+        }
 
         lineRenderer.SetPosition(0, FirePoint.position);
         lineRenderer.SetPosition(1, _Target.position);
+
+        Vector3 dir = FirePoint.position - _Target.position;
+
+        LaserImpact.transform.position = _Target.position + dir.normalized;
+        LaserImpact.transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private void Shoot()

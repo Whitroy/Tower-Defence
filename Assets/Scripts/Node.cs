@@ -15,7 +15,6 @@ public class Node : MonoBehaviour
     public Color nothavingMoreMoneyColor;
     public Vector3 SpawnOffset;
     public BuildManager buildManager;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -53,14 +52,17 @@ public class Node : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (!buildManager.CanBuild)
+        if (EventSystem.current.IsPointerOverGameObject())
             return;
 
         if (_turret != null)
         {
-            Debug.Log("Can't build");
+            buildManager.SelectNode(this);
             return;
         }
+
+        if (!buildManager.CanBuild)
+            return;
 
         buildManager.BuildTurretOn(this);
     }

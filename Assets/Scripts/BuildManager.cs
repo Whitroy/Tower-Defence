@@ -5,6 +5,8 @@ public class BuildManager : MonoBehaviour
 {
     public static BuildManager _instance;
     private TurretBluePrint _TurretToBuild;
+    private Node SelectedNode;
+    public NodeUI nodeUI;
     public GameObject buildEffect;
     private void Awake()
     {
@@ -16,7 +18,6 @@ public class BuildManager : MonoBehaviour
 
         _instance = this;
     }
-
     public bool CanBuild
     {
         get
@@ -35,6 +36,27 @@ public class BuildManager : MonoBehaviour
     public void SelectTurretToBuild(TurretBluePrint Turret)
     {
         _TurretToBuild = Turret;
+        DeSelectNode();
+    }
+
+    public void SelectNode(Node node)
+    {
+        if(SelectedNode == node)
+        {
+            DeSelectNode();
+            return;
+        }
+
+        SelectedNode = node;
+        _TurretToBuild = null;
+
+        nodeUI.SetTarget(node);
+    }
+
+    public void DeSelectNode()
+    {
+        SelectedNode = null;
+        nodeUI.Hide();
     }
 
     public void BuildTurretOn(Node node)
